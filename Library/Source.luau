@@ -73,7 +73,7 @@ local HFA = Enum.HorizontalAlignment
 local VFA = Enum.VerticalAlignment
 local RSM = Enum.ResamplerMode
 
-local FONT_ID = "rbxassetid://16658221428"
+local FONT_ID = "rbxassetid://12187365364"
 
 --=============================================================================
 -- Library root
@@ -453,8 +453,14 @@ end
 -- while dragging (and briefly afterwards, to settle), so it never fights the
 -- position tweens the open/close animations play on the same target.
 local function MakeDraggable(handle: GuiObject, target: GuiObject)
-	local dragging, dragStart, startPosition = false, Vector3.zero, UD2()
-	local goal = target.Position
+	local dragging = false
+	local dragStart = Vector3.zero
+	local startPosition = UD2()
+	
+	local curXScale, curXOffset = 0, 0
+	local curYScale, curYOffset = 0, 0
+	local goalXScale, goalXOffset = 0, 0
+	local goalYScale, goalYOffset = 0, 0
 	local settling = false
 
 	Connect(handle.InputBegan, function(input)
@@ -462,8 +468,13 @@ local function MakeDraggable(handle: GuiObject, target: GuiObject)
 			dragging = true
 			settling = true
 			dragStart = input.Position
-			startPosition = target.Position
-			goal = startPosition
+			
+			local pos = target.Position
+			startPosition = pos
+			curXScale, curXOffset = pos.X.Scale, pos.X.Offset
+			curYScale, curYOffset = pos.Y.Scale, pos.Y.Offset
+			goalXScale, goalXOffset = pos.X.Scale, pos.X.Offset
+			goalYScale, goalYOffset = pos.Y.Scale, pos.Y.Offset
 
 			local connection
 			connection = input.Changed:Connect(function()
@@ -483,12 +494,10 @@ local function MakeDraggable(handle: GuiObject, target: GuiObject)
 			return
 		end
 		local delta = input.Position - dragStart
-		goal = UD2(
-			startPosition.X.Scale,
-			startPosition.X.Offset + delta.X,
-			startPosition.Y.Scale,
-			startPosition.Y.Offset + delta.Y
-		)
+		goalXScale = startPosition.X.Scale
+		goalXOffset = startPosition.X.Offset + delta.X
+		goalYScale = startPosition.Y.Scale
+		goalYOffset = startPosition.Y.Offset + delta.Y
 	end)
 
 	Connect(RunService.RenderStepped, function(dt)
@@ -496,20 +505,21 @@ local function MakeDraggable(handle: GuiObject, target: GuiObject)
 			return
 		end
 
-		local position = target.Position
-		local settled = not dragging
-			and math.abs(goal.X.Offset - position.X.Offset) < 0.5
-			and math.abs(goal.Y.Offset - position.Y.Offset) < 0.5
-			and math.abs(goal.X.Scale - position.X.Scale) < 0.001
-			and math.abs(goal.Y.Scale - position.Y.Scale) < 0.001
+		local dx = goalXOffset - curXOffset
+		local dy = goalYOffset - curYOffset
+		local settled = not dragging and math.abs(dx) < 0.5 and math.abs(dy) < 0.5
 
 		if settled then
-			target.Position = goal
+			target.Position = UD2(goalXScale, goalXOffset, goalYScale, goalYOffset)
 			settling = false
 			return
 		end
 
-		target.Position = position:Lerp(goal, MC(dt * 20, 0, 1))
+		local alpha = MC(dt * 20, 0, 1)
+		curXOffset = curXOffset + dx * alpha
+		curYOffset = curYOffset + dy * alpha
+		
+		target.Position = UD2(goalXScale, curXOffset, goalYScale, curYOffset)
 	end)
 end
 
