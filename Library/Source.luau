@@ -73,7 +73,7 @@ local HFA = Enum.HorizontalAlignment
 local VFA = Enum.VerticalAlignment
 local RSM = Enum.ResamplerMode
 
-local FONT_ID = "rbxassetid://12187376174"
+local FONT_ID = "rbxassetid://16658221428"
 
 --=============================================================================
 -- Library root
