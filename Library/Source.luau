@@ -73,7 +73,7 @@ local HFA = Enum.HorizontalAlignment
 local VFA = Enum.VerticalAlignment
 local RSM = Enum.ResamplerMode
 
-local FONT_ID = "rbxassetid://12187365364"
+local FONT_ID = "rbxassetid://12187371840"
 
 --=============================================================================
 -- Library root
@@ -2560,7 +2560,7 @@ function Callisto:CreateWindow(options: { [string]: any }?)
 	BindGradient(footerGradient, { { 0, "Background" }, { 1, "Foreground" } })
 
 	local footerLabel = Text(footer, {
-		Text = opts.Footer or "https://discord.gg/robloxuis",
+		Text = opts.Footer or "",
 		TextTransparency = 0.5,
 		Name = "Label",
 		Size = UFS(0, 1),
